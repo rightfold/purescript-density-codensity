@@ -1,5 +1,10 @@
 {
   "name": "purescript-density-codensity",
+  "license": "BSD-3-Clause",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/rightfold/purescript-density-codensity.git"
+  },
   "dependencies": {
     "purescript-control": "^3.3.0",
     "purescript-exists": "^3.0.0",
