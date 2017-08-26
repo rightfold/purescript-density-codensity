@@ -1,12 +1,15 @@
 -- | Codensity monad.
 module Control.Monad.Codensity
   ( Codensity (..)
+  , unCodensity
   ) where
 
 import Prelude
 
+-- | Codensity monad.
 newtype Codensity f a = Codensity (∀ b. (a -> f b) -> f b)
 
+-- | Unwrap a `Codensity`.
 unCodensity :: ∀ f a b. Codensity f a -> (a -> f b) -> f b
 unCodensity (Codensity f) = f
 
