@@ -2,9 +2,13 @@
 module Control.Monad.Codensity
   ( Codensity (..)
   , unCodensity
+  , liftCodensity
+  , lowerCodensity
   ) where
 
 import Prelude
+
+import Control.Monad.Trans.Class (class MonadTrans)
 
 -- | Codensity monad.
 newtype Codensity f a = Codensity (∀ b. (a -> f b) -> f b)
@@ -26,3 +30,12 @@ instance bindCodensity :: Bind (Codensity f) where
   bind (Codensity f) k = Codensity (\g -> f (\x -> unCodensity (k x) g))
 
 instance monadCodensity :: Monad (Codensity f)
+
+instance monadTransCodensity :: MonadTrans Codensity where
+  lift = liftCodensity
+
+liftCodensity :: ∀ f a. Bind f => f a -> Codensity f a
+liftCodensity x = Codensity (x >>= _)
+
+lowerCodensity :: ∀ f a. Applicative f => Codensity f a -> f a
+lowerCodensity x = unCodensity x pure

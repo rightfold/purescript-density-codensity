@@ -3,17 +3,21 @@ module Control.Comonad.Density
   ( DensityF (..)
   , Density (..)
   , mkDensity
+  , liftDensity
+  , lowerDensity
   ) where
 
 import Prelude hiding (apply, map, pure)
 
 import Control.Comonad (class Comonad)
+import Control.Comonad.Trans.Class (class ComonadTrans)
 import Control.Extend (class Extend)
 import Data.Exists (Exists, mkExists, runExists)
 import Data.Newtype (class Newtype, un)
 import Data.Tuple (fst, snd)
 import Data.Tuple.Nested ((/\))
 
+import Control.Comonad as Control.Comonad
 import Prelude as Prelude
 
 -- | Helper for existential quantification.
@@ -43,6 +47,9 @@ instance extendDensity :: Extend (Density f) where
 instance comonadDensity :: Comonad (Density f) where
   extract = extract
 
+instance comonadTransDensity :: ComonadTrans Density where
+  lower = lowerDensity
+
 map :: ∀ f a a'. (a -> a') -> Density f a -> Density f a'
 map f' = runExists map' <<< un Density
   where map' :: ∀ b. DensityF f a b -> Density f a'
@@ -66,3 +73,11 @@ extract :: ∀ f a. Density f a -> a
 extract = runExists extract' <<< un Density
   where extract' :: ∀ b. DensityF f a b -> a
         extract' (DensityF f x) = f x
+
+liftDensity :: ∀ f a. Comonad f => f a -> Density f a
+liftDensity = mkDensity Control.Comonad.extract
+
+lowerDensity :: ∀ f a. Comonad f => Density f a -> f a
+lowerDensity = runExists lowerDensity' <<< un Density
+  where lowerDensity' :: ∀ b. DensityF f a b -> f a
+        lowerDensity' (DensityF f x) = Control.Comonad.extend f x
